@@ -1,0 +1,1 @@
+ip=`ifconfig | grep inet | grep 10.174 | grep Bcast | awk '{ print $2 }' | cut -d":" -f2`; hn=`hostname`; echo "preamble $ip   $hn"

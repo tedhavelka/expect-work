@@ -31,6 +31,11 @@ proc token_count {caller tokens} {
 
 
 proc set_expect_out_pattern_matches {} {
+#
+# NOTE:  this Tcl procedure didn't work as expected or needed, due to
+# local procedure scoping of these variables:  - TMH
+#
+
     puts "tcl procedure:  setting expect_out pattern match strings to some values,"
 
     set expect_out(1,string) 101
@@ -64,6 +69,7 @@ set es_remote_command [lindex $argv 3]
 
 set es_logfile "./z"
 
+# 2018-01-31 - `ls` command for development purposes only:
 set ls_command "ls -f -d \[abcDM\]*\r"
 
 
@@ -98,7 +104,7 @@ if {[string bytelength $es_remote_command] < 20} {
 }
 
 
-set_expect_out_pattern_matches 
+# set_expect_out_pattern_matches
 # Hmm, those variables in the tcl procedure only held their non-null values in that scope - TMH
 
 if { 1 } {
@@ -141,17 +147,15 @@ expect "*ssword: " { send "$es_passphrase\r" }
     puts "-- OPENING LOG FILE -- "
     log_file $es_logfile
 
-    send_log "pattern match 1: "; send_log $expect_out(1,string); send_log "\n"
+#    send_log "pattern match 1: "; send_log $expect_out(1,string); send_log "\n"
+#    send_log "pattern match 2: "; send_log $expect_out(2,string); send_log "\n"
+#    send_log "pattern match 3: "; send_log $expect_out(3,string); send_log "\n"
+#    send_log "pattern match 4: "; send_log $expect_out(4,string); send_log "\n"
+#    send_log "pattern match 5: "; send_log $expect_out(5,string); send_log "\n"
+#    send_log "pattern match 6: "; send_log $expect_out(6,string); send_log "\n"
 
-    send_log "pattern match 2: "; send_log $expect_out(2,string); send_log "\n"
-
-    send_log "pattern match 3: "; send_log $expect_out(3,string); send_log "\n"
-
-    send_log "pattern match 4: "; send_log $expect_out(4,string); send_log "\n"
-
-    send_log "pattern match 5: "; send_log $expect_out(5,string); send_log "\n"
-
-    send_log "pattern match 6: "; send_log $expect_out(6,string); send_log "\n"
+    send_log "$expect_out(1,string).$expect_out(2,string).$expect_out(3,string).$expect_out(4,string)   $expect_out(5,string)\n"
+#    send_log "--- MARK FROM SCRIPT ---\n"
 
     log_file
     puts "-- CLOSING LOG FILE -- "
