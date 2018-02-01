@@ -94,7 +94,7 @@ puts " "
 
 if {[string bytelength $es_remote_command] < 20} {
     puts "setting remote command string locally,"
-    set es_remote_command "ip=`ifconfig | grep inet | grep 10.174 | grep Bcast | awk '{ print \$2 }' | cut -d\":\" -f2`; hn=`hostname`; echo \"\$ip   \$hn\""
+    set es_remote_command "ip=`ifconfig | grep inet | grep 10.174 | grep Bcast | awk '{ print \$2 }' | cut -d\":\" -f2`; hn=`hostname`; echo \"preamble \$ip   \$hn\""
 }
 
 
@@ -131,14 +131,27 @@ expect "*ssword: " { send "$es_passphrase\r" }
     expect $prompt
 
     send "$es_remote_command\r"
-    expect "\r"
-
+#    expect "\r"
+    
+#    expect -re ".*([0-9]+)\.([0-9]+)\.([0-9]+)\.([0-9]+)   (([a-zA-Z]+).*)\r"  . . . must escape opening square brackets
+#    expect -re ".*(\[0-9]+)\.(\[0-9]+)\.(\[0-9]+)\.(\[0-9]+)   ((\[a-zA-Z]+).*)\r" . . . missing most digits in matched patterns
+#    expect -re ".*(\[0-9]+)\\.(\[0-9]+)\\.(\[0-9]+)\\.(\[0-9]+)   ((\[a-zA-Z]+).*)\r" . . . missing first digit of first IPv4 octet
+    expect -re "\[^0-9]*(\[0-9]+)\\.(\[0-9]+)\\.(\[0-9]+)\\.(\[0-9]+)   ((\[a-zA-Z]+).*)\r"
 
     puts "-- OPENING LOG FILE -- "
     log_file $es_logfile
 
-#    expect "\r"
-    expect "_1"
+    send_log "pattern match 1: "; send_log $expect_out(1,string); send_log "\n"
+
+    send_log "pattern match 2: "; send_log $expect_out(2,string); send_log "\n"
+
+    send_log "pattern match 3: "; send_log $expect_out(3,string); send_log "\n"
+
+    send_log "pattern match 4: "; send_log $expect_out(4,string); send_log "\n"
+
+    send_log "pattern match 5: "; send_log $expect_out(5,string); send_log "\n"
+
+    send_log "pattern match 6: "; send_log $expect_out(6,string); send_log "\n"
 
     log_file
     puts "-- CLOSING LOG FILE -- "
@@ -149,53 +162,64 @@ expect "*ssword: " { send "$es_passphrase\r" }
     expect $prompt
 
 
-if { 1 } {
-
-    puts "this expect script going on with further tests,"
-
+if { 0 } {
+#    puts "this expect script going on with further tests,"
+    puts "- TEST 2 -"
     puts "- NOTE 2 - to remote host $es_host sending 'ls' with carriage return . . ."
     send "ls -f -d \[abcDM\]*\r"
     expect {
-#        -re "(.*)xml" { puts [show_diag_tcl main "expecting \".*xml\", got:" 0]; puts [show_diag_tcl main $expect_out(buffer) 0] }
-#        -re "(.*)xml(.*)xml(.*)xml(.*)(.*)(.*)" { puts "- NOTE 2 - characters stored in expect's variable expect_out(1,string) are:"; puts $expect_out(1,string) }
         "\r" { puts "matched a new-line after sending `ls` command,"; exp_continue }
         -re "(.*)bin(.*)Desktop(.*)" { puts "matched pattern to break up remote `ls` results:"; puts $expect_out(1,string); puts $expect_out(2,string); exp_continue }
         -re "(.*)Music\r" { puts "matched pattern ending line with string '(.*)Music'," }
     }
+    puts " "
+    puts " "
+}
 
+
+if { 0 } {
+    puts "- TEST 3 -"
     send $ls_command
     expect -re "(.*)bin(.*)Desktop(.*)"
     puts "- NOTE 3 - splitting ls results on 'bin' and 'Desktop', \$expect_out(buffer) holds:"
-    puts "zzz out(buffer)"
+    puts "out(buffer) holds:"
     puts $expect_out(buffer)
-    puts "zzz out(1,string)"
+    puts "out(1,string) holds:"
     puts $expect_out(1,string)
-    puts "zzz out(2,string)"
+    puts "out(2,string) holds:"
     puts $expect_out(2,string)
-    puts "zzz out(3,string)"
+    puts "out(3,string) holds:"
     puts $expect_out(3,string)
+    puts " "
+    puts " "
+}
 
+
+if { 0 } {
+    puts "- TEST 4 -"
     send $ls_command
+    expect "\r" { puts "matched carriage return after sending `ls` command,"; exp_continue }
     expect -re "(.*)Music\r"
     puts "- NOTE 4 - looking at expect_out(n,string) for n in 1..3:"
-    puts "zzz out(buffer)"
+    puts "out(buffer) holds:"
     puts $expect_out(buffer)
-    puts "zzz out(1,string)"
+    puts "out(1,string) holds:"
     puts $expect_out(1,string)
-    puts "zzz out(2,string)"
+    puts "out(2,string) holds:"
     puts $expect_out(2,string)
-    puts "zzz out(3,string)"
+    puts "out(3,string) holds:"
     puts $expect_out(3,string)
+    puts " "
+    puts " "
+}
+
 
     send "\r"
     expect $prompt
 
-
-    puts "done with extra tests,"
-} else {
-    puts "expect 'capture result' script skipping extra tests,"
-}
-
+    puts "closing connection to remote host:"
+    send "exit\r"
+    expect $prompt
 
 
 puts "expect script done."
